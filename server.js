@@ -1,16 +1,21 @@
 "use strict";
 
 require("dotenv").config();
-var express = require("express");
-var bodyParser = require("body-parser");
-var expect = require("chai").expect;
-var cors = require("cors");
+const express = require("express");
+const bodyParser = require("body-parser");
+const expect = require("chai").expect;
+const cors = require("cors");
+const helmet = require("helmet");
+const apiRoutes = require("./routes/api.js");
+const fccTestingRoutes = require("./routes/fcctesting.js");
+const runner = require("./test-runner");
 
-var apiRoutes = require("./routes/api.js");
-var fccTestingRoutes = require("./routes/fcctesting.js");
-var runner = require("./test-runner");
+const app = express();
 
-var app = express();
+//Helmet Security Measures
+app.use(helmet.frameguard());
+app.use(helmet.dnsPrefetchControl());
+app.use(helmet.referrerPolicy({ policy: "same-origin" }));
 
 app.use("/public", express.static(process.cwd() + "/public"));
 
