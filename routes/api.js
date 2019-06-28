@@ -1,19 +1,22 @@
 /*
-*
-*
-*       Complete the API routing below
-*
-*
-*/
+ *
+ *
+ *       Complete the API routing below
+ *
+ *
+ */
 
-'use strict';
+"use strict";
 
-var expect = require('chai').expect;
+const expect = require("chai").expect;
+const mongoose = require("mongoose");
 
-module.exports = function (app) {
-  
-  app.route('/api/threads/:board');
-    
-  app.route('/api/replies/:board');
+mongoose.connect(process.env.DB, { useNewUrlParser: true });
+var db = mongoose.connection;
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
+module.exports = function(app) {
+  app.route("/api/threads/:board");
+
+  app.route("/api/replies/:board");
 };
