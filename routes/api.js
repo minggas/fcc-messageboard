@@ -10,6 +10,8 @@
 
 const expect = require("chai").expect;
 const mongoose = require("mongoose");
+const Reply = require("../models/Reply").Reply;
+const Thread = require("../models/Thread").Thread;
 
 mongoose.connect(process.env.DB, { useNewUrlParser: true });
 var db = mongoose.connection;
