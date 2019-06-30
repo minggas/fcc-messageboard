@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const ReplySchema = new mongoose.Schema({
+  thread_id: { type: mongoose.Schema.Types.ObjectId, ref: "Thread" },
   text: {
     type: String,
     required: true,
