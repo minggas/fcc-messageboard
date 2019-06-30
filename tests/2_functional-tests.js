@@ -12,6 +12,7 @@ var assert = chai.assert;
 var server = require("../server");
 
 chai.use(chaiHttp);
+let test_thread_id = "";
 
 suite("Functional Tests", function() {
   suite("API ROUTING FOR /api/threads/:board", function() {
@@ -62,8 +63,21 @@ suite("Functional Tests", function() {
       });
     });
 
-    suite('GET', function() {
-      
+    suite("GET", function() {
+      test("Show recent threads", function(done) {
+        chai
+          .request(server)
+          .get("/api/threads/test-board")
+          .end(function(err, res) {
+            test_thread_id = res.body[0]._id;
+            assert.equal(res.status, 200);
+            assert.isArray(res.body, "res should be an array");
+            assert.isObject(res.body[0]);
+            assert.notProperty(res.body[0], "delete_password");
+            assert.notProperty(res.body[0], "reported");
+            done();
+          });
+      });
     });
 
     /*suite("DELETE", function() {});
@@ -78,7 +92,7 @@ suite("Functional Tests", function() {
           .request(server)
           .post("/api/replies/test-board")
           .send({
-            thread_id: "5d17d37af205d2493dc39e5b",
+            thread_id: test_thread_id,
             text: "This is my first reply to message board - 54321",
             delete_password: "0d&2",
           })
@@ -99,19 +113,38 @@ suite("Functional Tests", function() {
             delete_password: "02$d&2",
           })
           .end(function(err, res) {
-            assert.equal(res.status, 500);
+            assert.equal(res.status, 403);
             assert.equal(
               res.text,
-              'Cannot update thread. error: CastError: Cast to ObjectId failed for value "Th1si2aInval1d" at path "_id" for model "Thread"',
+              "invalid Thread id",
               "Invalid thread id error",
             );
             done();
           });
       });
     });
-    /*
-    suite("GET", function() {});
 
+    suite("GET", function() {
+      test("Show entire test-board thread with all its replies", function(done) {
+        chai
+          .request(server)
+          .get("/api/replies/test-board")
+          .query({
+            thread_id: test_thread_id,
+          })
+          .end(function(err, res) {
+            assert.equal(res.status, 200);
+            assert.isObject(res.body);
+            assert.notProperty(res.body, "delete_password");
+            assert.notProperty(res.body, "reported");
+            assert.property(res.body, text);
+            assert.property(res.body, _id);
+            assert.isArray(res.body.replies, "Replies should be an array");
+            done();
+          });
+      });
+    });
+    /*
     suite("PUT", function() {});
 
     suite("DELETE", function() {});*/

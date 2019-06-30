@@ -36,6 +36,23 @@ module.exports = function(app) {
         return res.redirect(`/b/${board}`);
       });
     })
+    .get((req, res) => {
+      const board = req.params.board;
+      Thread.find(
+        { board },
+        { __v: 0, delete_password: 0, reported: 0 },
+        { sort: { bumped_on: -1 }, limit: 10 },
+      )
+        .populate({
+          path: "replies",
+          select: "-delete_password -reported -__v",
+          options: { limit: 3 },
+        })
+        .exec((err, result) => {
+          if (err) return res.status(506).send(err);
+          return res.status(200).json(result);
+        });
+    });
 
   app.route("/api/replies/:board").post((req, res) => {
     if (!req.body.text.trim())
@@ -61,4 +78,21 @@ module.exports = function(app) {
       },
     );
   });
+    })
+    .get((req, res) => {
+      const thread_id = req.query.thread_id;
+      Thread.findOne(
+        { _id: thread_id },
+        { __v: 0, delete_password: 0, reported: 0 },
+        { sort: { bumped_on: -1 } },
+      )
+        .populate({
+          path: "replies",
+          select: "-delete_password -reported -__v",
+        })
+        .exec((err, result) => {
+          if (err) return res.status(506).send(err);
+          return res.status(200).json(result);
+        });
+    });
 };
