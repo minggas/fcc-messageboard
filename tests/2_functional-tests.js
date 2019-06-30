@@ -137,8 +137,8 @@ suite("Functional Tests", function() {
             assert.isObject(res.body);
             assert.notProperty(res.body, "delete_password");
             assert.notProperty(res.body, "reported");
-            assert.property(res.body, text);
-            assert.property(res.body, _id);
+            assert.property(res.body, "text");
+            assert.property(res.body, "_id");
             assert.isArray(res.body.replies, "Replies should be an array");
             done();
           });
