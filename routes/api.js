@@ -37,11 +37,15 @@ module.exports = function(app) {
       });
     })
 
-  app.route("/api/replies/:board").post((req, res) => {
+  app
+    .route("/api/replies/:board")
+    .post((req, res) => {
     if (!req.body.text.trim())
       return res.status(401).send("text field is required");
     if (!req.body.delete_password.trim())
       return res.status(402).send("delete_password field is required");
+      if (!mongoose.Types.ObjectId.isValid(req.body.thread_id))
+        return res.status(403).send("invalid Thread id");
 
     const board = req.params.board;
     const text = req.body.text;
