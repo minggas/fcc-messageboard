@@ -52,6 +52,22 @@ module.exports = function(app) {
           if (err) return res.status(506).send(err);
           return res.status(200).json(result);
         });
+    })
+    .delete((req, res) => {
+      if (!req.body.delete_password.trim())
+        return res.status(402).send("delete_password field is required");
+      if (!mongoose.Types.ObjectId.isValid(req.body.thread_id))
+        return res.status(403).send("invalid Thread id");
+
+      const board = req.params.board;
+      const thread_id = req.body.thread_id;
+      const delete_password = req.body.delete_password;
+
+      Thread.deleteOne({ _id: thread_id, delete_password }, (err, result) => {
+        if (result.deletedCount === 0)
+          return res.status(500).send("incorrect password");
+        return res.status(200).send("success");
+      });
     });
 
   app
@@ -68,12 +84,13 @@ module.exports = function(app) {
       const text = req.body.text;
       const delete_password = req.body.delete_password;
       const thread_id = req.body.thread_id;
-      const newReply = new Reply({ text, delete_password });
+      const newReply = new Reply({ text, delete_password, thread_id });
+      newReply.save();
       Thread.updateOne(
         { _id: thread_id },
         {
           $set: { bumped_on: new Date() },
-          $push: { replies: newReply },
+          $push: { replies: newReply._id },
         },
         (err, result) => {
           if (err)
@@ -97,5 +114,28 @@ module.exports = function(app) {
           if (err) return res.status(506).send(err);
           return res.status(200).json(result);
         });
+    })
+    .delete((req, res) => {
+      if (!req.body.delete_password.trim())
+        return res.status(402).send("delete_password field is required");
+      if (!mongoose.Types.ObjectId.isValid(req.body.thread_id))
+        return res.status(403).send("invalid Thread id");
+      if (!mongoose.Types.ObjectId.isValid(req.body.reply_id))
+        return res.status(403).send("invalid reply id");
+
+      const board = req.params.board;
+      const thread_id = req.body.thread_id;
+      const reply_id = req.body.reply_id;
+      const delete_password = req.body.delete_password;
+
+      Reply.updateOne(
+        { _id: reply_id, thread_id, delete_password },
+        { $set: { text: "[deleted]" } },
+        (err, result) => {
+          if (result.nModified === 0)
+            return res.status(500).send("incorrect password");
+          return res.status(200).send("success");
+        },
+      );
     });
 };
