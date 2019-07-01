@@ -106,21 +106,6 @@ suite("Functional Tests", function() {
     });
 
     suite("DELETE", function() {
-      test("Delete thread with correct thread_id and delete_password", function(done) {
-        chai
-          .request(server)
-          .delete("/api/threads/test-board")
-          .send({
-            thread_id: test_thread_id2,
-            delete_password: "02$del*&2",
-          })
-          .end(function(err, res) {
-            assert.equal(res.status, 200, "status error");
-            assert.equal(res.text, "success");
-            done();
-          });
-      });
-
       test("Delete thread with incorrect delete_password", function(done) {
         chai
           .request(server)
@@ -135,9 +120,35 @@ suite("Functional Tests", function() {
             done();
           });
       });
+
+      test("Delete thread with correct thread_id and delete_password", function(done) {
+        chai
+          .request(server)
+          .delete("/api/threads/test-board")
+          .send({
+            thread_id: test_thread_id2,
+            delete_password: "02$del*&2",
+          })
+          .end(function(err, res) {
+            assert.equal(res.status, 200, "status error");
+            assert.equal(res.text, "success");
+            done();
+          });
+      });
     });
-    /*
-    suite("PUT", function() {}); */
+    suite("PUT", function() {
+      test("report a thread passing valid thread_id", function(done) {
+        chai
+          .request(server)
+          .put("/api/threads/test-board")
+          .send({ thread_id: test_thread_id })
+          .end(function(err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.text, "success");
+            done();
+          });
+      });
+    });
   });
 
   suite("API ROUTING FOR /api/replies/:board", function() {
@@ -204,9 +215,21 @@ suite("Functional Tests", function() {
           });
       });
     });
-    /*
-    suite("PUT", function() {});
-*/
+
+    suite("PUT", function() {
+      test("report a reply passing valid reply_id", function(done) {
+        chai
+          .request(server)
+          .put("/api/replies/test-board")
+          .send({ thread_id: test_thread_id, reply_id: test_reply_id })
+          .end(function(err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.text, "success");
+            done();
+          });
+      });
+    });
+
     suite("DELETE", function() {
       test("Delete reply with correct thread_id and delete_password", function(done) {
         chai

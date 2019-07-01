@@ -6,15 +6,13 @@
  *
  */
 
-"use strict";
-
 const expect = require("chai").expect;
 const mongoose = require("mongoose");
 const Reply = require("../models/Reply").Reply;
 const Thread = require("../models/Thread").Thread;
 
 mongoose.connect(process.env.DB, { useNewUrlParser: true });
-var db = mongoose.connection;
+const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 module.exports = function(app) {
@@ -68,6 +66,24 @@ module.exports = function(app) {
           return res.status(500).send("incorrect password");
         return res.status(200).send("success");
       });
+    })
+    .put((req, res) => {
+      if (!mongoose.Types.ObjectId.isValid(req.body.thread_id))
+        return res.status(403).send("invalid Thread id");
+
+      const thread_id = req.body.thread_id;
+
+      Thread.updateOne(
+        { _id: thread_id },
+        { $set: { reported: true } },
+        (err, result) => {
+          if (err)
+            return res.status(500).send(`Cannot update thread. error: ${err}`);
+          if (result.nModified === 0)
+            return res.status(500).send("not reported");
+          res.status(200).send("success");
+        },
+      );
     });
 
   app
@@ -135,6 +151,27 @@ module.exports = function(app) {
           if (result.nModified === 0)
             return res.status(500).send("incorrect password");
           return res.status(200).send("success");
+        },
+      );
+    })
+    .put((req, res) => {
+      if (!mongoose.Types.ObjectId.isValid(req.body.thread_id))
+        return res.status(403).send("invalid Thread id");
+      if (!mongoose.Types.ObjectId.isValid(req.body.reply_id))
+        return res.status(403).send("invalid Reply id");
+
+      const thread_id = req.body.thread_id;
+      const reply_id = req.body.reply_id;
+
+      Reply.updateOne(
+        { thread_id, _id: reply_id },
+        { $set: { reported: true } },
+        (err, result) => {
+          if (err)
+            return res.status(500).send(`Cannot update thread. error: ${err}`);
+          if (result.nModified === 0)
+            return res.status(500).send("not reported");
+          res.status(200).send("success");
         },
       );
     });
